@@ -1,5 +1,4 @@
-﻿using StockManager.Core.DTOs;
-using StockManager.Core.Entities;
+﻿using StockManager.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +11,8 @@ namespace StockManager.Infrastructure.Interfaces
 	{
 		Task<IList<StockItem>> GetAllAsync();
 		Task<StockItem> GetByIdAsync(string Isin);
-		void InsertAsync(StockItem entity);
-		void Update(StockItem entity, StockItemDTO dto);
+		void Insert(StockItem entity);
+		void Update(StockItem entity, decimal? price, int? quantity);
 		void Delete(StockItem entity);
 		Task SaveAsync();
 		IQueryable<StockItem> Find(Expression<Func<StockItem, bool>> predicate);

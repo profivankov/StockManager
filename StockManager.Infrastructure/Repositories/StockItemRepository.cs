@@ -1,5 +1,4 @@
-﻿using StockManager.Core.DTOs;
-using StockManager.Core.Entities;
+﻿using StockManager.Core.Entities;
 using StockManager.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -24,22 +23,20 @@ namespace StockManager.Infrastructure.Repositories
 
         public async Task<StockItem> GetByIdAsync(string Isin) => await _dbSet.FindAsync(Isin);
 
-        public void InsertAsync(StockItem entity) => _dbSet.Add(entity);
+        public void Insert(StockItem entity) => _dbSet.Add(entity);
 
-        public void Update(StockItem entity, StockItemDTO dto)
+        public void Update(StockItem entity, decimal? price, int? quantity)
         {
-            if (entity == null) throw new Exception("Entity not found");
+            if (entity == null)
+                throw new InvalidOperationException("Entity cannot be null.");
 
-            if (dto.Price.HasValue && entity.Price != dto.Price.Value)
-            {
-                entity.Price = dto.Price.Value;
-            }
+            if (price.HasValue)
+                entity.Price = price.Value;
 
-            if (dto.Quantity.HasValue && entity.Quantity != dto.Quantity.Value)
-            {
-                entity.Quantity = dto.Quantity.Value;
-            }
+            if (quantity.HasValue)
+                entity.Quantity = quantity.Value;
         }
+
         public void Delete(StockItem entity) => _dbSet.Remove(entity);
 
         public async Task SaveAsync()

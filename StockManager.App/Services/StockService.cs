@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Data.Entity;
 
 namespace StockManager.App.Services
 {
@@ -19,6 +20,11 @@ namespace StockManager.App.Services
 
         public async Task AddStock(StockItemDTO dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                throw new ArgumentException("Stock name cannot be empty.");
+            }
+
             var stockItem = await _stockRepository.GetByIdAsync(dto.Isin);
 
             if (stockItem != null)
@@ -35,7 +41,7 @@ namespace StockManager.App.Services
                 Price = dto.Price ?? 0
             };
 
-            _stockRepository.InsertAsync(stockItem);
+            _stockRepository.Insert(stockItem);
             await _stockRepository.SaveAsync();
         }
 
@@ -48,7 +54,7 @@ namespace StockManager.App.Services
                 throw new Exception("Stock not found for update");
             }
 
-            _stockRepository.Update(stockItem, dto);
+            _stockRepository.Update(stockItem, dto.Price, dto.Quantity);
             await _stockRepository.SaveAsync();
         }
 
@@ -58,19 +64,19 @@ namespace StockManager.App.Services
 
         public IQueryable<StockItem> Search(string Isin = null, string partialName = null)
         {
-            IQueryable<StockItem> query = null;
+            IQueryable<StockItem> query = _stockRepository.Find(st => true);
+                
 
             if (Isin != null)
-            {
-                query = _stockRepository.Find( st => st.Isin == Isin);
-            }
+                query = query.Where(st => st.Isin == Isin);
 
             if (partialName != null)
             {
-                query = _stockRepository.Find(st => st.Name.ToLower().Contains(partialName.ToLower()));
+                var lowerName = partialName.ToLower();
+                query = query.Where(st => st.Name.ToLower().Contains(lowerName));
             }
 
-            return query ?? _stockRepository.Find(st => false);
+            return query.AsNoTracking();
         }
 
     }

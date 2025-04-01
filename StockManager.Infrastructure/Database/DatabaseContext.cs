@@ -6,6 +6,26 @@ using System.Data.SQLite.EF6;
 
 namespace StockManager.Infrastructure.Database
 {
+    [DbConfigurationType(typeof(SQLiteConfiguration))]
+    public class DatabaseContext : DbContext
+    {
+        public DbSet<StockItem> StockItems { get; set; }
+
+        public DatabaseContext(string connectionString)
+          : base(new SQLiteConnection(connectionString), contextOwnsConnection: true)
+        {
+            System.Data.Entity.Database.SetInitializer<DatabaseContext>(null);
+        }
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<StockItem>()
+                .Property(p => p.Price)
+                .HasPrecision(18, 2); 
+
+            base.OnModelCreating(modelBuilder);
+        }
+    }
+
     public class SQLiteConfiguration : DbConfiguration
     {
         public SQLiteConfiguration()
@@ -13,15 +33,6 @@ namespace StockManager.Infrastructure.Database
             SetProviderFactory("System.Data.SQLite", SQLiteFactory.Instance);
             SetProviderFactory("System.Data.SQLite.EF6", SQLiteProviderFactory.Instance);
             SetProviderServices("System.Data.SQLite", (DbProviderServices)SQLiteProviderFactory.Instance.GetService(typeof(DbProviderServices)));
-        }
-    }
-    public class DatabaseContext : DbContext
-    {
-        public DbSet<StockItem> StockItems { get; set; }
-
-        public DatabaseContext(string connectionString)
-            : base(new SQLiteConnection(connectionString), contextOwnsConnection: true) {
-            DbConfiguration.SetConfiguration(new SQLiteConfiguration());
         }
     }
 }
